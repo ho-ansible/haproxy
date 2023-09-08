@@ -1,1 +1,20 @@
 ---
+- name: haproxy | disable services
+  service:
+    name: haproxy
+    state: stopped
+    enabled: no
+
+- name: haproxy | remove config
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+  - "{{ haproxy_cfg_path }}"
+  - "{{ haproxy_iptables_path }}"
+  - "{{ haproxy_iptables_path | dirname }}"
+
+- name: haproxy | uninstall package
+  package:
+    name: haproxy
+    state: absent

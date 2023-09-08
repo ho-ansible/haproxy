@@ -1,1 +1,26 @@
 ---
+
+- name: haproxy | install packages
+  tags:
+  - package
+  package:
+    name: haproxy
+  notify: restart haproxy
+
+- name: haproxy | firewall config dir
+  tags:
+  - firewall
+  file:
+    path: "{{ haproxy_iptables_path | dirname }}"
+    state: directory
+
+- name: haproxy | config
+  tags:
+  - config
+  template:
+    src:  "{{ item | basename }}.j2"
+    dest: "{{ item }}"
+  loop:
+  - "{{ haproxy_iptables_path }}"
+  - "{{ haproxy_cfg_path }}"
+  notify: restart haproxy

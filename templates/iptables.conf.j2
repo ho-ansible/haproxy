@@ -1,22 +1,31 @@
 # {{ ansible_managed }}
 # Firewall rules for haproxy
 {% set ipt = '/usr/sbin/iptables' %}
+{% set ipt6 = '/usr/sbin/ip6tables' %}
 {% set ch = 'in_haproxy' %}
 {% set in_rule = '-j ' ~ ch %}
 
 [Service]
 # Setup ref to chain
-ExecStartPre=!-{{ ipt }} -N {{ ch }}
-ExecStartPre=!{{ ipt }} -F {{ ch }}
-ExecStartPre=!-{{ ipt }} -D INPUT {{ in_rule }}
-ExecStartPre=!{{ ipt }} -A INPUT {{ in_rule }}
+ExecStartPre=-!{{ ipt  }} -N {{ ch }}
+ExecStartPre=-!{{ ipt6 }} -N {{ ch }}
+ExecStartPre= !{{ ipt  }} -F {{ ch }}
+ExecStartPre= !{{ ipt6 }} -F {{ ch }}
+ExecStartPre=-!{{ ipt  }} -D INPUT {{ in_rule }}
+ExecStartPre=-!{{ ipt6 }} -D INPUT {{ in_rule }}
+ExecStartPre= !{{ ipt  }} -A INPUT {{ in_rule }}
+ExecStartPre= !{{ ipt6 }} -A INPUT {{ in_rule }}
 
 {% for port in haproxy_ports %}
-ExecStartPre=!{{ ipt }} -A {{ ch }} -p tcp --dport {{ port }} -j ACCEPT
+ExecStartPre=!{{ ipt  }} -A {{ ch }} -p tcp --dport {{ port }} -j ACCEPT
+ExecStartPre=!{{ ipt6 }} -A {{ ch }} -p tcp --dport {{ port }} -j ACCEPT
 {% endfor %}
 
 # Cleanup: unref, flush, delete
-ExecStopPost=!-{{ ipt }} -D INPUT {{ in_rule }}
-ExecStopPost=!-{{ ipt }} -F {{ ch }}
-ExecStopPost=!-{{ ipt }} -X {{ ch }}
+ExecStopPost=-!{{ ipt  }} -D INPUT {{ in_rule }}
+ExecStopPost=-!{{ ipt6 }} -D INPUT {{ in_rule }}
+ExecStopPost=-!{{ ipt  }} -F {{ ch }}
+ExecStopPost=-!{{ ipt6 }} -F {{ ch }}
+ExecStopPost=-!{{ ipt  }} -X {{ ch }}
+ExecStopPost=-!{{ ipt6 }} -X {{ ch }}
 
